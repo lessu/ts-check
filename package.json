@@ -1,0 +1,19 @@
+{
+  "name": "ts-type-checker",
+  "version": "0.1.0",
+  "description": "Type checker for typescript",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/index.js",
+    "build": "tsc"
+  },
+  "keywords": [
+    "typescript",
+    "validate",
+    "checker",
+    "type-checker"
+  ],
+  "dependencies": {},
+  "author": "lessu",
+  "license": "ISC"
+}
