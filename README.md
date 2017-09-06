@@ -210,7 +210,7 @@ So DO NOT call like CustomType(a,"1,2,3"), It will convert to
     "a",
     "\"1",
     "2",
-    "3\"
+    "3\""
 ]
 ```
 

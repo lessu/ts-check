@@ -2,6 +2,7 @@ import * as TypeCheker from "../index";
 import * as mocha from "mocha";
 import * as assert from "assert";
 
+
 describe("Basic Check",function(){
     it("undefined",function(){
         assert(TypeCheker.checkType(undefined,"undefined"));

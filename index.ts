@@ -107,6 +107,7 @@ function _checkOptions<T>(object : T , typeChecker : TypeForObject<T> , definedT
     return true;
 }
 
+
 export function checkType<T>(value:any , type:Type<T> | Type<T>[] ,definedTypes?:DefinedChecker<T>) : boolean{
     definedTypes = Object.assign(defaultDefinedChecker , definedTypes);
     if(typeof type == "object" && type instanceof Array){
