@@ -39,7 +39,7 @@ TypeChecker.checkType(sku,"SetSkuItem[]",{
     },
     ItemOptions : {
         filed_id : "number",
-        filed_options:["number,"string"]
+        filed_options:["number","string"]
     }
 });
 ```
@@ -196,7 +196,7 @@ TypeChecker.checkType(sku,"SetSkuItem[]",{
     },
     ItemOptions : {
         filed_id : "number",
-        filed_options:["number,"string"]
+        filed_options:["number","string"]
     }
 });
 ```
