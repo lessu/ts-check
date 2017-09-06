@@ -9,7 +9,7 @@ Description
 -----------
 A flexable type checker.
 
-tested under typescript 2.3.4;
+tested under typescript 2.3.4 and 2.4.2;
 
 ## Installation
 Not published to npm yet.
@@ -19,8 +19,12 @@ Not published to npm yet.
 2.tsc
 
 
+## Test
+
+mocha tests/index.js
+
 ## Features
-Flexable,easy type checker for complex object.
+Flexable,easy-to-extend type checker for complex object.
 
 ## Usage
 
@@ -52,12 +56,19 @@ TypeCheker.checkType(123,"number");
 ```
 
 ### Check Array
-
+any length
 ```typescript
 assert(TypeCheker.checkType([1,2,3,4,5,6],"number[]"));
+```
+
+check length
+```typescript
 assert(TypeCheker.checkType([1,2,3],"number[3]"));
 assert(!TypeCheker.checkType([1,2,3],"number[2]"));
+```
 
+array array
+```typescript
 assert(TypeCheker.checkType([[1],[2],[3]],"number[1][3]"));
 assert(TypeCheker.checkType([[1],[2],[3]],"number[][3]"));
 ```
@@ -67,6 +78,7 @@ Signature
 ```typescript 
 ((value:any)=>boolean);
 ```
+Useage
 ```typescript 
 TypeCheker.checkType( { a : "1" },(value)=>{
     return typeof value["a"] == "string";
@@ -101,7 +113,7 @@ TypeCheker.checkType({
 ```
 
 ### Type array
-The checked type can be string number or {a:number};
+The checked value can be string, number or {a:number};
 
 ```typescript
 TypeCheker.checkType({a:1},["string","number",{
@@ -110,7 +122,11 @@ TypeCheker.checkType({a:1},["string","number",{
 ```
 
 
-### Customized types
+### Customized types DefainedTypes
+```typescript
+//definedTypes is a {customType => check} object.
+TypeCheker.checkType(value,type,definedTypes);
+```
 
 ```typescript
 TypeCheker.checkType(
@@ -122,7 +138,7 @@ TypeCheker.checkType(
 {
     biggerThan0 : ">0"
 },
-//custom type
+//custom type,define >0 as a custom type , and can be used in typeChecker
 {
     ">0" : function( value : any ){
         if(typeof value == "number"){
@@ -133,7 +149,7 @@ TypeCheker.checkType(
     }
 });
 
-
+//custom type can be nested
 TypeCheker.checkType({
     biggerThan0 : [1,2,3,4]
 },{
@@ -148,8 +164,7 @@ TypeCheker.checkType({
     }
 });
 
-//or
-
+//or a real life example
 TypeChecker.checkType(sku,"SetSkuItem[]",{
     SetSkuItem : {
         key         : "string",
@@ -157,7 +172,11 @@ TypeChecker.checkType(sku,"SetSkuItem[]",{
         unit        : "number",
         price       : "number",
         cost_price  : "number",
-        options     : "number[]"
+        options     : "ItemOptions[]"
+    },
+    ItemOptions : {
+        filed_id : "number",
+        filed_options:["number,"string]
     }
 });
 ```
@@ -165,13 +184,15 @@ TypeChecker.checkType(sku,"SetSkuItem[]",{
 ### DefinedType With args
 If a DefinedType is a function, args are supported;
 
-However,Args will be convert to pure string ; every `,` is recognized as a splitor,
+Notice,Args will be convert to pure string ; every `,` is recognized as a splitor,
 So DO NOT call like CustomType(a,"1,2,3"), It will convert to 
-```
-"a",
-"\"1",
-"2",
-"3\"
+```typescript
+[
+    "a",
+    "\"1",
+    "2",
+    "3\"
+]
 ```
 
 ```typescript
@@ -195,6 +216,8 @@ assert(!
 ```
 
 ### Default defined type
+Custom type can be add to default defaultDefinedChecker object;
+so that can be used any where.
 ```typescript
 TypeCheker.defaultDefinedChecker[">0"] = function(value:any){
     if(typeof value == "number"){
@@ -206,9 +229,6 @@ TypeCheker.defaultDefinedChecker[">0"] = function(value:any){
 assert(TypeCheker.checkType({a:1},{a:">0"}));
 assert(!TypeCheker.checkType({a:-1},{a:">0"}));
 ```
-## Test
-
-mocha tests/index.js
 
 ## License
 MIT
