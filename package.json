@@ -1,5 +1,5 @@
 {
-  "name": "ts-type-checker",
+  "name": "ts-check",
   "version": "0.1.0",
   "description": "Type checker for typescript",
   "main": "index.js",
@@ -13,7 +13,16 @@
     "checker",
     "type-checker"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "mocha":"latest",
+    "@types/mocha":"latest",
+    "@types/node":"latest"
+  },
   "author": "lessu",
-  "license": "ISC"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lessu/ts-check.git"
+  },
+  "homepage": "https://github.com/lessu/ts-check"
 }
