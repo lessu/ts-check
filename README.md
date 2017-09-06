@@ -43,7 +43,6 @@ TypeChecker.checkType(sku,"SetSkuItem[]",{
     }
 });
 ```
-```
 
 
 ## Usage
