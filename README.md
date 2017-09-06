@@ -12,11 +12,11 @@ A flexable type checker.
 tested under typescript 2.3.4 and 2.4.2;
 
 ## Installation
-Not published to npm yet.
 
-1.download or clone.
 
-2.tsc
+```
+npm install ts-check --save 
+```
 
 
 ## Test
