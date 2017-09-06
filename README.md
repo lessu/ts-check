@@ -26,6 +26,26 @@ mocha tests/index.js
 ## Features
 Flexable,easy-to-extend type checker for complex object.
 
+example
+``` typescript
+TypeChecker.checkType(sku,"SetSkuItem[]",{
+    SetSkuItem : {
+        key         : "string",
+        stock       : "number",
+        unit        : "number",
+        price       : "number",
+        cost_price  : "number",
+        options     : "ItemOptions[]"
+    },
+    ItemOptions : {
+        filed_id : "number",
+        filed_options:["number,"string"]
+    }
+});
+```
+```
+
+
 ## Usage
 
 ### import
@@ -78,7 +98,7 @@ Signature
 ```typescript 
 ((value:any)=>boolean);
 ```
-Useage
+Usage
 ```typescript 
 TypeCheker.checkType( { a : "1" },(value)=>{
     return typeof value["a"] == "string";
@@ -176,7 +196,7 @@ TypeChecker.checkType(sku,"SetSkuItem[]",{
     },
     ItemOptions : {
         filed_id : "number",
-        filed_options:["number,"string]
+        filed_options:["number,"string"]
     }
 });
 ```
