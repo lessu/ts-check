@@ -49,7 +49,7 @@ TypeChecker.checkType(sku,"SetSkuItem[]",{
 
 ### import
 ```
-import * as TypeChecker from "type-checker";
+import * as TypeChecker from "ts-checker";
 ```
 
 ### Basic Type
