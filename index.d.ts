@@ -15,4 +15,7 @@ export declare type Type<T> = BasicTypes | ((value: any) => boolean) | TypeForOb
 export declare type DefinedChecker<T> = {
     [key: string]: Type<T>;
 };
-export declare function checkType<T>(value: any, type: Type<T> | Type<T>[], definedTypes?: DefinedChecker<T>): boolean;
+export interface CheckOptions {
+    weakNumber?: boolean;
+}
+export declare function checkType<T>(value: any, type: Type<T> | Type<T>[], _definedTypes?: DefinedChecker<T>, _options?: CheckOptions): boolean;

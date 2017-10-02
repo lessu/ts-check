@@ -19,6 +19,14 @@ export type Type<T> = BasicTypes | ((value:any)=>boolean) | TypeForObject<T> | s
 export type DefinedChecker<T> = {
     [key : string] : Type<T>;
 }
+
+export interface CheckOptions {
+    //weak number,"1" is assert success if weakNumber = true,default to false
+    weakNumber? : boolean
+}
+const defaultOptions = <CheckOptions>{
+    weakNumber : false
+}
 // aa[] => true,-1,aa
 // aa[3]=> true,3,aa
 // aa[invalid => false,0,null
@@ -54,7 +62,7 @@ function definedTypesParse(type:string) : [string,string[]]{
     return [typename,args];
 }
 
-function _checkType<T>(value:any , type:Type<T>,definedTypes?:DefinedChecker<T>) : boolean{
+function _checkType<T>(value:any , type:Type<T>,definedTypes:DefinedChecker<T>,options:CheckOptions) : boolean{
     if(typeof type == "string"){
         const isArray = typeArrayCount(type);
         if(isArray[0]){
@@ -65,7 +73,7 @@ function _checkType<T>(value:any , type:Type<T>,definedTypes?:DefinedChecker<T>)
                 return false;
             }
             for(let i = 0; i< value.length;i++){
-                if(_checkType(value[i] , <BasicTypes>isArray[2] , definedTypes) == false){
+                if(_checkType(value[i] , <BasicTypes>isArray[2] ,definedTypes,options) == false){
                     return false;
                 }
             }
@@ -77,7 +85,7 @@ function _checkType<T>(value:any , type:Type<T>,definedTypes?:DefinedChecker<T>)
             if(typeof value == type){
                 return true;
             }
-            if(type == "number" && !isNaN(value)){
+            if(options.weakNumber && type == "number" && !isNaN(value)){
                 return true;
             }
             const definedTypeParse = definedTypesParse(type);
@@ -86,7 +94,7 @@ function _checkType<T>(value:any , type:Type<T>,definedTypes?:DefinedChecker<T>)
                 if(typeof customType == "function"){
                     return (<(value:any,arg:string[])=>boolean>customType) (value,definedTypeParse[1]);
                 }else{
-                    return _checkType<T>(value , customType , definedTypes);
+                    return _checkType<T>(value , customType ,definedTypes,options);
                 }
             }
             return false;
@@ -96,12 +104,12 @@ function _checkType<T>(value:any , type:Type<T>,definedTypes?:DefinedChecker<T>)
         return (<(value:any)=>boolean> type)(value);
     }else if(typeof type == "object"){
         //type checker;
-        return _checkOptions(value,type,definedTypes);
+        return _checkOptions(value,type,definedTypes,options);
     }
     return false;
 }
 
-function _checkOptions<T>(object : T , typeChecker : TypeForObject<T> , definedTypes?:DefinedChecker<T>) : boolean{
+function _checkOptions<T>(object : T , typeChecker : TypeForObject<T> , definedTypes:DefinedChecker<T>,options:CheckOptions) : boolean{
     for(let key in typeChecker){
         if(checkType<T>(object[key],typeChecker[key],definedTypes) == false){
             return false;
@@ -111,15 +119,19 @@ function _checkOptions<T>(object : T , typeChecker : TypeForObject<T> , definedT
 }
 
 
-export function checkType<T>(value:any , type:Type<T> | Type<T>[] ,definedTypes?:DefinedChecker<T>) : boolean{
-    definedTypes = Object.assign(defaultDefinedChecker , definedTypes);
+export function checkType<T>(value:any , type:Type<T> | Type<T>[] ,_definedTypes?:DefinedChecker<T>,_options?:CheckOptions) : boolean{
+    let options = {};
+    Object.assign(options , defaultOptions,_options);
+    let definedTypes = {};
+    Object.assign(definedTypes , defaultDefinedChecker , _definedTypes);
+    
     if(typeof type == "object" && type instanceof Array){
         for(let i = 0 ;i < type.length;i++){
-            if(_checkType(value,type[i],definedTypes)){
+            if(_checkType(value,type[i],definedTypes,options)){
                 return true;
             }
         }
         return false;
     }
-    return _checkType(value,<Type<T>>type,definedTypes);
+    return _checkType(value,<Type<T>>type,definedTypes,options);
 }

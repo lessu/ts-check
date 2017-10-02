@@ -12,6 +12,9 @@ var BasicTypes;
     BasicTypes["undefined"] = "undefined";
 })(BasicTypes = exports.BasicTypes || (exports.BasicTypes = {}));
 exports.defaultDefinedChecker = {};
+const defaultOptions = {
+    weakNumber: false
+};
 // aa[] => true,-1,aa
 // aa[3]=> true,3,aa
 // aa[invalid => false,0,null
@@ -46,7 +49,7 @@ function definedTypesParse(type) {
     const args = argsString.split(",");
     return [typename, args];
 }
-function _checkType(value, type, definedTypes) {
+function _checkType(value, type, definedTypes, options) {
     if (typeof type == "string") {
         const isArray = typeArrayCount(type);
         if (isArray[0]) {
@@ -57,7 +60,7 @@ function _checkType(value, type, definedTypes) {
                 return false;
             }
             for (let i = 0; i < value.length; i++) {
-                if (_checkType(value[i], isArray[2], definedTypes) == false) {
+                if (_checkType(value[i], isArray[2], definedTypes, options) == false) {
                     return false;
                 }
             }
@@ -73,7 +76,7 @@ function _checkType(value, type, definedTypes) {
             if (typeof value == type) {
                 return true;
             }
-            if (type == "number" && !isNaN(value)) {
+            if (options.weakNumber && type == "number" && !isNaN(value)) {
                 return true;
             }
             const definedTypeParse = definedTypesParse(type);
@@ -83,7 +86,7 @@ function _checkType(value, type, definedTypes) {
                     return customType(value, definedTypeParse[1]);
                 }
                 else {
-                    return _checkType(value, customType, definedTypes);
+                    return _checkType(value, customType, definedTypes, options);
                 }
             }
             return false;
@@ -95,11 +98,11 @@ function _checkType(value, type, definedTypes) {
     }
     else if (typeof type == "object") {
         //type checker;
-        return _checkOptions(value, type, definedTypes);
+        return _checkOptions(value, type, definedTypes, options);
     }
     return false;
 }
-function _checkOptions(object, typeChecker, definedTypes) {
+function _checkOptions(object, typeChecker, definedTypes, options) {
     for (let key in typeChecker) {
         if (checkType(object[key], typeChecker[key], definedTypes) == false) {
             return false;
@@ -107,17 +110,20 @@ function _checkOptions(object, typeChecker, definedTypes) {
     }
     return true;
 }
-function checkType(value, type, definedTypes) {
-    definedTypes = Object.assign(exports.defaultDefinedChecker, definedTypes);
+function checkType(value, type, _definedTypes, _options) {
+    let options = {};
+    Object.assign(options, defaultOptions, _options);
+    let definedTypes = {};
+    Object.assign(definedTypes, exports.defaultDefinedChecker, _definedTypes);
     if (typeof type == "object" && type instanceof Array) {
         for (let i = 0; i < type.length; i++) {
-            if (_checkType(value, type[i], definedTypes)) {
+            if (_checkType(value, type[i], definedTypes, options)) {
                 return true;
             }
         }
         return false;
     }
-    return _checkType(value, type, definedTypes);
+    return _checkType(value, type, definedTypes, options);
 }
 exports.checkType = checkType;
 //# sourceMappingURL=index.js.map

@@ -15,8 +15,11 @@ describe("Basic Check",function(){
     });
     it("number",function(){
         assert(TypeCheker.checkType(1,"number"));
-        assert(TypeCheker.checkType("1","number"));
     });
+    it("weak number",function(){
+        assert(TypeCheker.checkType("1","number",{},{weakNumber:true}));
+    });
+
     it("object",function(){
         assert(TypeCheker.checkType(1,{}));
     });
@@ -36,7 +39,7 @@ describe("Basic Check",function(){
         assert(TypeCheker.checkType([1,2,3],"number[3]"));
         assert(!TypeCheker.checkType([1,2,3],"number[2]"));
         assert(TypeCheker.checkType(["1","2","3"],"string[]"));
-        assert(!TypeCheker.checkType([1,"a",3],"number[]"));
+        assert(!TypeCheker.checkType([1,"2",3],"number[]"));
         assert(!TypeCheker.checkType([1,"2",{}],"object[]"));
         assert(TypeCheker.checkType([{},[],{}],"object[]"));
         assert(TypeCheker.checkType([{},1,{},"1"],"any[]"));
@@ -59,7 +62,7 @@ describe("Basic Check",function(){
         assert(TypeCheker.checkType({a:"1"},{
             a : "string"
         }));
-        assert(!TypeCheker.checkType({a:"1a"},{
+        assert(!TypeCheker.checkType({a:"1"},{
             a : "number"
         }));
     });
@@ -237,6 +240,7 @@ describe("Type synax",function(){
         }
         const CustomizedType = {
             ">0" : function(value:any){
+                console.log(" whats up "+value)
                 if(typeof value == "number"){
                     return value > 0;
                 }else{
@@ -249,7 +253,7 @@ describe("Type synax",function(){
             b : "number",
             c : ">0"
         };
-        assert(TypeCheker.checkType(CheckObject,check));
+        assert(TypeCheker.checkType(CheckObject,check,CustomizedType));
     });
 });
 

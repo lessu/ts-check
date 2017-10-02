@@ -72,6 +72,9 @@ TypeCheker.checkType(null,"any");
 
 TypeCheker.checkType(123,"number");
 
+//Notice a string number is also a number type in weak Number mode;
+TypeCheker.checkType("123","number",{},{weakNumber:true});
+
 ```
 
 ### Check Array
