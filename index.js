@@ -73,6 +73,9 @@ function _checkType(value, type, definedTypes) {
             if (typeof value == type) {
                 return true;
             }
+            if (type == "number" && !isNaN(value)) {
+                return true;
+            }
             const definedTypeParse = definedTypesParse(type);
             if (definedTypes && definedTypes[definedTypeParse[0]]) {
                 const customType = definedTypes[definedTypeParse[0]];

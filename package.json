@@ -14,11 +14,11 @@
     "type-checker"
   ],
   "dependencies": {
-    "@types/mocha":"latest",
-    "@types/node":"latest"
+    "@types/mocha": "latest",
+    "@types/node": "latest"
   },
-  "devDependencies":{
-    "mocha":"latest"
+  "devDependencies": {
+    "mocha": "latest"
   },
   "author": "lessu",
   "license": "MIT",
