@@ -111,7 +111,7 @@ function _checkType<T>(value:any , type:Type<T>,definedTypes:DefinedChecker<T>,o
 
 function _checkOptions<T>(object : T , typeChecker : TypeForObject<T> , definedTypes:DefinedChecker<T>,options:CheckOptions) : boolean{
     for(let key in typeChecker){
-        if(checkType<T>(object[key],typeChecker[key],definedTypes) == false){
+        if(checkType<T>(object[key],typeChecker[key],definedTypes,options) == false){
             return false;
         }
     }

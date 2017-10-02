@@ -104,7 +104,7 @@ function _checkType(value, type, definedTypes, options) {
 }
 function _checkOptions(object, typeChecker, definedTypes, options) {
     for (let key in typeChecker) {
-        if (checkType(object[key], typeChecker[key], definedTypes) == false) {
+        if (checkType(object[key], typeChecker[key], definedTypes, options) == false) {
             return false;
         }
     }
