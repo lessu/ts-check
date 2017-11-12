@@ -1,3 +1,4 @@
+const extend = require("extend");
 // Lessu!
 export enum BasicTypes{
     number      = "number",
@@ -121,9 +122,9 @@ function _checkOptions<T>(object : T , typeChecker : TypeForObject<T> , definedT
 
 export function checkType<T>(value:any , type:Type<T> | Type<T>[] ,_definedTypes?:DefinedChecker<T>,_options?:CheckOptions) : boolean{
     let options = {};
-    Object.assign(options , defaultOptions,_options);
+    extend(options , defaultOptions,_options);
     let definedTypes = {};
-    Object.assign(definedTypes , defaultDefinedChecker , _definedTypes);
+    extend(definedTypes , defaultDefinedChecker , _definedTypes);
     
     if(typeof type == "object" && type instanceof Array){
         for(let i = 0 ;i < type.length;i++){

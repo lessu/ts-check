@@ -15,7 +15,8 @@
   ],
   "dependencies": {
     "@types/mocha": "latest",
-    "@types/node": "latest"
+    "@types/node": "latest",
+    "extend": "^3.0.1"
   },
   "devDependencies": {
     "mocha": "latest"
