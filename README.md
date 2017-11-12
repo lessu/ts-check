@@ -10,6 +10,7 @@ Description
 A flexable type checker.
 
 tested under typescript 2.3.4 and 2.4.2;
+es5 is now supported
 
 ## Installation
 
