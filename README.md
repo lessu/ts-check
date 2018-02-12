@@ -1,4 +1,4 @@
-# TypeChecker for Typescript
+# TypeChecker for JavaScript/Typescript
 
 <!-- [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url] -->
