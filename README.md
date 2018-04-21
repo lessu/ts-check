@@ -9,7 +9,7 @@ Description
 -----------
 A flexable type checker.
 
-tested under typescript 2.3.4 and 2.4.2;
+tested under typescript 2.3.4 and 2.4.2, 2.8.1;
 es5 is now supported
 
 ## Installation
@@ -21,7 +21,6 @@ npm install ts-check --save
 
 
 ## Test
-
 mocha tests/index.js
 
 ## Features
@@ -44,6 +43,12 @@ TypeChecker.checkType(sku,"SetSkuItem[]",{
     }
 });
 ```
+## Update Log
+- v0.2.3
+
+    1.New feature added : now we can get failed log message by access `lastError` variable.
+
+    2.Fix type error synax under typescript 2.8.1
 
 
 ## Usage

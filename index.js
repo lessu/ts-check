@@ -13,6 +13,14 @@ var BasicTypes;
     BasicTypes["undefined"] = "undefined";
 })(BasicTypes = exports.BasicTypes || (exports.BasicTypes = {}));
 exports.defaultDefinedChecker = {};
+function makeErrorMessage(key, exceptToBe, actual) {
+    if (key && key.length > 0) {
+        exports.lastError += "[" + key + "] type check failed,reason: except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
+    }
+    else {
+        exports.lastError += "type check failed,reason: except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
+    }
+}
 var defaultOptions = {
     weakNumber: false
 };
@@ -50,44 +58,64 @@ function definedTypesParse(type) {
     var args = argsString.split(",");
     return [typename, args];
 }
-function _checkType(value, type, definedTypes, options) {
+function _checkType(key, value, type, definedTypes, options) {
     if (typeof type == "string") {
         var isArray = typeArrayCount(type);
         if (isArray[0]) {
             if (!(value instanceof Array)) {
+                makeErrorMessage(key, "value type to be an array", value);
                 return false;
             }
             if (isArray[1] >= 0 && value.length != isArray[1]) {
+                makeErrorMessage(key, "array length=" + isArray[1], value.length);
                 return false;
             }
             for (var i = 0; i < value.length; i++) {
-                if (_checkType(value[i], isArray[2], definedTypes, options) == false) {
+                if (_checkType(key, value[i], isArray[2], definedTypes, options) == false) {
+                    // makeErrorMessage(`${key}[${i}]`,"value type to be "+isArray[2] , value);
                     return false;
                 }
             }
             return true;
         }
         else {
-            if (type == "any")
+            if (type == "any") {
                 return true;
-            if (type == "null")
-                return value == null;
-            if (type == "undefined")
-                return value == undefined;
+            }
+            if (type == "null") {
+                var result = (value == null);
+                if (result == false)
+                    makeErrorMessage(key, "value to be null", value);
+                return result;
+            }
+            if (type == "undefined") {
+                var result = (value == undefined);
+                if (result == false)
+                    if (result == false)
+                        makeErrorMessage(key, "value to be undefined", value);
+                return result;
+            }
             if (typeof value == type) {
                 return true;
             }
             if (options.weakNumber && type == "number" && !isNaN(value)) {
                 return true;
             }
+            // type check with ‘user defined type’
             var definedTypeParse = definedTypesParse(type);
             if (definedTypes && definedTypes[definedTypeParse[0]]) {
                 var customType = definedTypes[definedTypeParse[0]];
                 if (typeof customType == "function") {
-                    return customType(value, definedTypeParse[1]);
+                    var result = customType(value, definedTypeParse[1]);
+                    if (result == false)
+                        makeErrorMessage(key, "value type to be " + type, value);
+                    return result;
                 }
                 else {
-                    return _checkType(value, customType, definedTypes, options);
+                    var result = _checkType(key, value, customType, definedTypes, options);
+                    if (result == false)
+                        makeErrorMessage(key, "value type to be " + type, value);
+                    return result;
                 }
             }
             return false;
@@ -95,36 +123,48 @@ function _checkType(value, type, definedTypes, options) {
     }
     else if (typeof type == "function") {
         //cystom type checker;       
-        return type(value);
+        var result = type(value);
+        if (result == false)
+            makeErrorMessage(key, "value pass function check", value);
+        return result;
     }
     else if (typeof type == "object") {
-        //type checker;
-        return _checkOptions(value, type, definedTypes, options);
+        if (type instanceof Array) {
+            for (var i = 0; i < type.length; i++) {
+                if (_checkType(key, value, type[i], definedTypes, options)) {
+                    return true;
+                }
+            }
+            // makeErrorMessage(key,"value type mismatch", null);
+            return false;
+        }
+        else {
+            //type checker;
+            var result = _checkOptions(value, type, definedTypes, options);
+            // if(result == false) makeErrorMessage(key,"value type mismatch", null);
+            return result;
+        }
     }
     return false;
 }
 function _checkOptions(object, typeChecker, definedTypes, options) {
     for (var key in typeChecker) {
-        if (checkType(object[key], typeChecker[key], definedTypes, options) == false) {
+        if (_checkType(key, object[key], typeChecker[key], definedTypes, options) == false) {
+            // makeErrorMessage(key,"value type mismatch", null);
             return false;
         }
     }
     return true;
 }
 function checkType(value, type, _definedTypes, _options) {
+    exports.lastError = "";
     var options = {};
     extend(options, defaultOptions, _options);
     var definedTypes = {};
     extend(definedTypes, exports.defaultDefinedChecker, _definedTypes);
-    if (typeof type == "object" && type instanceof Array) {
-        for (var i = 0; i < type.length; i++) {
-            if (_checkType(value, type[i], definedTypes, options)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    return _checkType(value, type, definedTypes, options);
+    var result = _checkType("", value, type, definedTypes, options);
+    return result;
 }
 exports.checkType = checkType;
+exports.lastError = null;
 //# sourceMappingURL=index.js.map

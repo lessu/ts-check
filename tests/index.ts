@@ -240,7 +240,6 @@ describe("Type synax",function(){
         }
         const CustomizedType = {
             ">0" : function(value:any){
-                console.log(" whats up "+value)
                 if(typeof value == "number"){
                     return value > 0;
                 }else{

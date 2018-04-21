@@ -9,25 +9,34 @@ export enum BasicTypes{
     null        = "null",
     undefined   = "undefined"
 }
-export const defaultDefinedChecker : DefinedChecker<any> = {}
+export const defaultDefinedChecker : DefinedChecker = {}
 
 export type TypeForObject<T> = {
-    [K in keyof T]: Type<T>[] | Type<T>
+    [K in keyof T]: Type<T[K]>[] | Type<T[K]>
 }
 
-export type Type<T> = BasicTypes | ((value:any)=>boolean) | TypeForObject<T> | string;
+export type Type<T> = BasicTypes | ((value:any,args:string[])=>boolean) | TypeForObject<T> | string;
 
-export type DefinedChecker<T> = {
-    [key : string] : Type<T>;
+export type DefinedChecker = {
+    [ key:string ] : Type<any>;
 }
 
 export interface CheckOptions {
     //weak number,"1" is assert success if weakNumber = true,default to false
     weakNumber? : boolean
 }
+function makeErrorMessage(key:string|null,exceptToBe:string,actual:any){
+    if(key && key.length > 0){
+        lastError += `[${key}] type check failed,reason: except ${exceptToBe},actual = ${JSON.stringify(actual)}\n`;
+    }else{
+        lastError += `type check failed,reason: except ${exceptToBe},actual = ${JSON.stringify(actual)}\n`;
+    }
+}
+
 const defaultOptions = <CheckOptions>{
     weakNumber : false
 }
+
 // aa[] => true,-1,aa
 // aa[3]=> true,3,aa
 // aa[invalid => false,0,null
@@ -63,56 +72,89 @@ function definedTypesParse(type:string) : [string,string[]]{
     return [typename,args];
 }
 
-function _checkType<T>(value:any , type:Type<T>,definedTypes:DefinedChecker<T>,options:CheckOptions) : boolean{
+function _checkType<T>(key : string,value:any , type:Type<T> | Type<T>[] ,definedTypes:DefinedChecker,options:CheckOptions) : boolean{
     if(typeof type == "string"){
         const isArray = typeArrayCount(type);
         if(isArray[0]){
             if(!(value instanceof Array)){
+                makeErrorMessage(key,"value type to be an array" , value);
                 return false
             }
             if(isArray[1]>=0 && value.length != isArray[1]){
+                makeErrorMessage(key,"array length="+isArray[1] , value.length);
                 return false;
             }
             for(let i = 0; i< value.length;i++){
-                if(_checkType(value[i] , <BasicTypes>isArray[2] ,definedTypes,options) == false){
+                if(_checkType(key,value[i] , <BasicTypes>isArray[2] ,definedTypes,options) == false){
+                    // makeErrorMessage(`${key}[${i}]`,"value type to be "+isArray[2] , value);
                     return false;
                 }
             }
             return true;
         }else{
-            if(type == "any") return true;
-            if(type == "null") return value == null;
-            if(type == "undefined") return value == undefined;
+            if(type == "any") {
+                return true;
+            }
+            if(type == "null"){
+                const result = (value == null);
+                if(result == false) makeErrorMessage(key,"value to be null" , value);
+                return result;
+            } 
+            if(type == "undefined"){
+                const result = (value == undefined);
+                if(result == false)if(result == false) makeErrorMessage(key,"value to be undefined" , value);
+                return result;
+            }
             if(typeof value == type){
                 return true;
             }
             if(options.weakNumber && type == "number" && !isNaN(value)){
                 return true;
             }
+            // type check with ‘user defined type’
             const definedTypeParse = definedTypesParse(type);
             if(definedTypes && definedTypes[definedTypeParse[0]]){
                 const customType = definedTypes[definedTypeParse[0]];
                 if(typeof customType == "function"){
-                    return (<(value:any,arg:string[])=>boolean>customType) (value,definedTypeParse[1]);
+                    const result = (<(value:any,arg:string[])=>boolean>customType) (value,definedTypeParse[1]);
+                    if(result == false) makeErrorMessage(key,"value type to be " + type, value);
+                    return result;
                 }else{
-                    return _checkType<T>(value , customType ,definedTypes,options);
+                    const result =  _checkType(key , value , customType ,definedTypes,options);
+                    if(result == false) makeErrorMessage(key,"value type to be " + type, value);
+                    return result;
                 }
             }
             return false;
         }
     }else if(typeof type == "function"){
         //cystom type checker;       
-        return (<(value:any)=>boolean> type)(value);
+        const result = (<(value:any)=>boolean> type)(value);
+        if(result == false) makeErrorMessage(key,"value pass function check", value);
+        return result;
     }else if(typeof type == "object"){
-        //type checker;
-        return _checkOptions(value,type,definedTypes,options);
+        if(type instanceof Array){
+            for(let i = 0 ;i < type.length;i++){
+                if(_checkType(key,value,type[i],definedTypes,options)){
+                    return true;
+                }
+            }
+            // makeErrorMessage(key,"value type mismatch", null);
+            return false;
+        }else{
+            //type checker;
+            const result = _checkOptions(value,type,definedTypes,options);
+            // if(result == false) makeErrorMessage(key,"value type mismatch", null);
+            return result;
+        }
     }
     return false;
 }
 
-function _checkOptions<T>(object : T , typeChecker : TypeForObject<T> , definedTypes:DefinedChecker<T>,options:CheckOptions) : boolean{
+function _checkOptions<T>(object : T , typeChecker : TypeForObject<T> , definedTypes:DefinedChecker,options:CheckOptions) : boolean{
     for(let key in typeChecker){
-        if(checkType<T>(object[key],typeChecker[key],definedTypes,options) == false){
+        if(_checkType<T[keyof T]>(key,object[key],typeChecker[key],definedTypes,options) == false){
+            // makeErrorMessage(key,"value type mismatch", null);
             return false;
         }
     }
@@ -120,19 +162,16 @@ function _checkOptions<T>(object : T , typeChecker : TypeForObject<T> , definedT
 }
 
 
-export function checkType<T>(value:any , type:Type<T> | Type<T>[] ,_definedTypes?:DefinedChecker<T>,_options?:CheckOptions) : boolean{
+export function checkType<T extends any>(value:any , type:Type<T> | Type<T>[] ,_definedTypes?:DefinedChecker,_options?:CheckOptions) : boolean{
+    lastError = "";
     let options = {};
     extend(options , defaultOptions,_options);
     let definedTypes = {};
     extend(definedTypes , defaultDefinedChecker , _definedTypes);
-    
-    if(typeof type == "object" && type instanceof Array){
-        for(let i = 0 ;i < type.length;i++){
-            if(_checkType(value,type[i],definedTypes,options)){
-                return true;
-            }
-        }
-        return false;
-    }
-    return _checkType(value,<Type<T>>type,definedTypes,options);
+  
+    const result = _checkType("",value,<Type<T>>type,definedTypes,options);
+
+    return result;
 }
+
+export let lastError : string|null = null;
