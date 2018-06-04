@@ -15,10 +15,20 @@ var BasicTypes;
 exports.defaultDefinedChecker = {};
 function makeErrorMessage(key, exceptToBe, actual) {
     if (key && key.length > 0) {
-        exports.lastError += "[" + key + "] type check failed,reason: except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
+        if (actual) {
+            exports.lastError += "[" + key + "] type check failed,reason: except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
+        }
+        else {
+            exports.lastError += "type check failed,reason: [" + key + "] " + exceptToBe + "\n";
+        }
     }
     else {
-        exports.lastError += "type check failed,reason: except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
+        if (actual) {
+            exports.lastError += "type check failed,reason: except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
+        }
+        else {
+            exports.lastError += "type check failed,reason: " + exceptToBe + "\n";
+        }
     }
 }
 var defaultOptions = {
@@ -94,6 +104,10 @@ function _checkType(key, value, type, definedTypes, options) {
                     if (result == false)
                         makeErrorMessage(key, "value to be undefined", value);
                 return result;
+            }
+            if (value == undefined) {
+                makeErrorMessage(key, "is missing", undefined);
+                return false;
             }
             if (typeof value == type) {
                 return true;
