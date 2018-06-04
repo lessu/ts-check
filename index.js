@@ -16,18 +16,18 @@ exports.defaultDefinedChecker = {};
 function makeErrorMessage(key, exceptToBe, actual) {
     if (key && key.length > 0) {
         if (actual) {
-            exports.lastError += "[" + key + "] type check failed,reason: except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
+            exports.lastError += "[" + key + "] except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
         }
         else {
-            exports.lastError += "type check failed,reason: [" + key + "] " + exceptToBe + "\n";
+            exports.lastError += "[" + key + "] " + exceptToBe + "\n";
         }
     }
     else {
         if (actual) {
-            exports.lastError += "type check failed,reason: except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
+            exports.lastError += "except " + exceptToBe + ",actual = " + JSON.stringify(actual) + "\n";
         }
         else {
-            exports.lastError += "type check failed,reason: " + exceptToBe + "\n";
+            exports.lastError += exceptToBe + "\n";
         }
     }
 }
