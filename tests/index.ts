@@ -23,6 +23,7 @@ describe("Basic Check",function(){
     it("object",function(){
         assert(TypeCheker.checkType(1,{}));
     });
+
     it("any",function(){
         assert(TypeCheker.checkType(function(){},"any"));
         assert(TypeCheker.checkType([],"any"));
@@ -65,6 +66,13 @@ describe("Basic Check",function(){
         assert(!TypeCheker.checkType({a:"1"},{
             a : "number"
         }));
+    });
+
+    it("check missing key",function(){
+        assert(!TypeCheker.checkType({},{
+            a : "string"
+        }));
+        console.log(TypeCheker.lastError);
     });
     it("nested type",function(){
         assert(TypeCheker.checkType({a:"1"},{

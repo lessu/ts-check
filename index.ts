@@ -27,9 +27,17 @@ export interface CheckOptions {
 }
 function makeErrorMessage(key:string|null,exceptToBe:string,actual:any){
     if(key && key.length > 0){
-        lastError += `[${key}] type check failed,reason: except ${exceptToBe},actual = ${JSON.stringify(actual)}\n`;
+        if(actual){
+            lastError += `[${key}] except ${exceptToBe},actual = ${JSON.stringify(actual)}\n`;
+        }else{
+            lastError += `[${key}] ${exceptToBe}\n`;
+        }
     }else{
-        lastError += `type check failed,reason: except ${exceptToBe},actual = ${JSON.stringify(actual)}\n`;
+        if(actual){
+            lastError += `except ${exceptToBe},actual = ${JSON.stringify(actual)}\n`;
+        }else{
+            lastError += `${exceptToBe}\n`;
+        }
     }
 }
 
@@ -105,12 +113,17 @@ function _checkType<T>(key : string,value:any , type:Type<T> | Type<T>[] ,define
                 if(result == false)if(result == false) makeErrorMessage(key,"value to be undefined" , value);
                 return result;
             }
+            if(value == undefined){
+                makeErrorMessage(key,"is missing",undefined);
+                return false;
+            }
             if(typeof value == type){
                 return true;
             }
             if(options.weakNumber && type == "number" && !isNaN(value)){
                 return true;
             }
+
             // type check with ‘user defined type’
             const definedTypeParse = definedTypesParse(type);
             if(definedTypes && definedTypes[definedTypeParse[0]]){
